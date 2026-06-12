@@ -1,6 +1,5 @@
 """
 run_pipeline.py — THE QUANTUM BIO-SEAM: Full Verification Suite
-================================================================
 Runs all three proofs and the scRNA-seq matrix pipeline.
 
 Usage
@@ -52,7 +51,7 @@ from viz import (
     plot_summary_dashboard,
 )
 
-# ── Output dirs ───────────────────────────────────────────────────────────────
+# Output dirs
 Path("outputs/plots").mkdir(parents=True, exist_ok=True)
 Path("outputs/results").mkdir(parents=True, exist_ok=True)
 
@@ -64,9 +63,8 @@ logging.basicConfig(
 logger = logging.getLogger("pipeline")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # Proof 1: Sherman-Morrison Efficiency
-# ─────────────────────────────────────────────────────────────────────────────
 
 def run_proof1(N: int = 5000, seed: int = 42, device: torch.device = None) -> dict:
     if device is None:
@@ -118,9 +116,9 @@ def run_proof1(N: int = 5000, seed: int = 42, device: torch.device = None) -> di
                 time_naive=time_naive, time_sm=time_sm, N=N)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # Proof 3 (SVD rank-1) + GRN from synthetic or real scRNA-seq
-# ─────────────────────────────────────────────────────────────────────────────
+#----------------------------------------------------------------------------
 
 def _synthetic_scrna(
     n_cells: int = 400,
@@ -200,7 +198,7 @@ def run_scrna_pipeline(
     print("  PROOF 3 + scRNA-seq PIPELINE")
     print(f"{'='*62}")
 
-    # ── Load / generate data ─────────────────────────────────────────────────
+    # Load / generate data 
     if scrna_path:
         logger.info("Loading scRNA-seq data from: %s", scrna_path)
         adata  = auto_load(scrna_path)
@@ -267,14 +265,14 @@ def run_scrna_pipeline(
     print(f"  Expression: {X_full.shape[0]} cells × {X_full.shape[1]} genes")
     print(f"  col(F): {X_col.shape[1]} genes | ker(F): {X_ker.shape[1]} genes")
 
-    # ── Build GRN ─────────────────────────────────────────────────────────────
+    # Build GRN
     print("\n  Building GRN…")
     grn = GRNEngine.from_expression(
         X_full, gene_names=gene_names, max_genes=n_genes_grn
     )
     grn.invert()
 
-    # ── Batch rank-1 updates from condition means ─────────────────────────────
+    # Batch rank-1 updates from condition means
     print("\n  Applying Sherman-Morrison updates from conditions…")
     records = grn.batch_update_from_conditions(condition_means)
     print(f"  Applied {len(records)} rank-1 updates.")
@@ -282,25 +280,25 @@ def run_scrna_pipeline(
         print(f"    Update #{r.update_id}: denom={r.denom:.4f}  "
               f"max_Δ={r.max_delta:.3e}  {r.time_s*1000:.2f}ms")
 
-    # ── SVD rank-1 test ───────────────────────────────────────────────────────
+    # SVD rank-1 test 
     print("\n  Running SVD rank-1 validation…")
     detector = RankOneDetector(threshold=0.90)
     svd_result = detector.run(trajectories)
 
-    # ── ker(F) load ────────────────────────────────────────────────────────────
+    # ker(F) load
     print("\n  Computing ker(F) load per cell…")
     estimator = KernelLoadEstimator(critical_threshold=0.35)
     load_metrics = estimator.compute(X_ker, X_col)
     print(f"  Bottleneck cells: {load_metrics['n_bottleneck']:.0f} "
           f"({load_metrics['pct_bottleneck']:.1f}%)")
 
-    # ── Figures ───────────────────────────────────────────────────────────────
+    # Figures
     print("\n  Generating figures…")
     plot_svd_spectrum(svd_result)
     plot_kernel_load(load_metrics["ker_load"])
     plot_grn_response_map(grn.response_map, gene_names=grn.gene_names[:n_genes_grn], n_show=40)
 
-    # ── Save SVD summary ──────────────────────────────────────────────────────
+    # Save SVD summary 
     import pandas as pd
     svd_df = pd.DataFrame({
         "Component":           range(1, len(svd_result.singular_values)+1),
@@ -318,9 +316,9 @@ def run_scrna_pipeline(
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # Main
-# ─────────────────────────────────────────────────────────────────────────────
+
 
 def parse_args():
     p = argparse.ArgumentParser(description="THE QUANTUM BIO-SEAM — Verification Suite")
@@ -357,11 +355,11 @@ def main():
     print(f"  ERI Labs · June 2026 · Device: {str(device).upper()}")
     print("█"*62)
 
-    # ── Proof 1 ───────────────────────────────────────────────────────────────
+    # Proof 1 
     p1 = run_proof1(N=args.n_genes, seed=args.seed, device=device)
     plot_sm_efficiency(p1["time_naive"], p1["time_sm"], p1["max_error"], p1["N"])
 
-    # ── Proof 2 ───────────────────────────────────────────────────────────────
+    # Proof 2 
     print(f"\n{'='*62}")
     print("  PROOF 2: Architecture Gap")
     print(f"{'='*62}")
@@ -371,7 +369,7 @@ def main():
     print(f"  Kernel-Aware MLP MSE: {p2['Kernel-Aware MLP (Bio-Seam)']['final_mse']:.4f}")
     print(f"  Architecture gap:     {p2['gap_ratio']:.1f}×")
 
-    # ── Proof 3 + scRNA-seq ──────────────────────────────────────────────────
+    # Proof 3 + scRNA-seq 
     p3 = run_scrna_pipeline(
         scrna_path   = args.scrna,
         ker_gene_list = ker_genes,
@@ -381,7 +379,7 @@ def main():
         device       = device,
     )
 
-    # ── Summary dashboard ─────────────────────────────────────────────────────
+    # Summary dashboard 
     print("\n  Generating summary dashboard…")
     plot_summary_dashboard(
         svd_result  = p3["svd_result"],
@@ -391,7 +389,7 @@ def main():
         N_genes     = p1["N"],
     )
 
-    # ── JSON report ───────────────────────────────────────────────────────────
+    # JSON report 
     report = {
         "proof_1": {
             "speedup":    round(p1["speedup"], 2),
@@ -418,7 +416,7 @@ def main():
     with open(report_path, "w") as f:
         json.dump(report, f, indent=2, default=lambda o: bool(o) if isinstance(o, (bool, np.bool_)) else str(o))
 
-    # ── Final printout ────────────────────────────────────────────────────────
+    # Final printout 
     print(f"\n{'═'*62}")
     print("  VERIFICATION SUITE COMPLETE")
     print(f"{'─'*62}")
