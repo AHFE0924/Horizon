@@ -21,9 +21,9 @@ import torch.nn.functional as F
 logger = logging.getLogger(__name__)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # Architecture Gap: standard vs. kernel-aware MLP
-# ─────────────────────────────────────────────────────────────────────────────
+
 
 class ContinuousMLP(nn.Module):
     """
@@ -106,7 +106,7 @@ class KernelAwareMLP(nn.Module):
 
         fused_dim = hidden_dim  # col + ker branches
 
-        # Gating: learn how much to weight ker branch per input
+        # Gating: learn how much to weight ker branch/input
         self.gate = nn.Sequential(
             nn.Linear(fused_dim, fused_dim),
             nn.Sigmoid(),
@@ -138,9 +138,9 @@ class KernelAwareMLP(nn.Module):
         return out
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # Cell Fate Transition Model (scRNA-seq)
-# ─────────────────────────────────────────────────────────────────────────────
+#----------------------------------------------------------------------------
 
 class CellFateTransitionModel(nn.Module):
     """
@@ -255,9 +255,9 @@ class CellFateTransitionModel(nn.Module):
         }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # Architecture Gap Proof (Proof 2)
-# ─────────────────────────────────────────────────────────────────────────────
+#------------------------------------------------------------------------------
 
 def generate_codon_dataset(
     n_samples: int = 10000,
