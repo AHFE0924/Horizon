@@ -1,6 +1,6 @@
 """
 sherman_morrison.py — Sherman-Morrison GRN Engine
-==================================================
+
 Core matrix-math module for the Quantum Bio-Seam pipeline.
 
 Implements:
@@ -27,9 +27,9 @@ import torch.nn.functional as F
 logger = logging.getLogger(__name__)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # Helpers
-# ─────────────────────────────────────────────────────────────────────────────
+
 
 def _sym_regularize(A: torch.Tensor, eps: float = 1e-4) -> torch.Tensor:
     """Symmetrize and add ridge regularization for invertibility."""
@@ -47,9 +47,9 @@ def _safe_inv(A: torch.Tensor) -> torch.Tensor:
         return torch.linalg.pinv(A)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # 1. GRN Engine
-# ─────────────────────────────────────────────────────────────────────────────
+
 
 @dataclass
 class UpdateRecord:
@@ -89,7 +89,7 @@ class GRNEngine:
         self._updates: list[UpdateRecord] = []
         self._update_counter = 0
 
-    # ── Construction ─────────────────────────────────────────────────────────
+    # Construction
 
     @classmethod
     def from_expression(
@@ -140,7 +140,7 @@ class GRNEngine:
         logger.info("GRN matrix built: %d × %d", genes, genes)
         return cls(A, gene_names=gene_names)
 
-    # ── Inversion ────────────────────────────────────────────────────────────
+    # Inversion
 
     def invert(self, force: bool = False) -> "GRNEngine":
         """Compute A⁻¹. Cached — only runs once unless force=True."""
@@ -153,7 +153,7 @@ class GRNEngine:
         logger.info("Inversion complete: %.3f s", dt)
         return self
 
-    # ── Sherman-Morrison rank-1 update ────────────────────────────────────────
+    # Sherman-Morrison rank-1 update
 
     def update(
         self,
@@ -209,7 +209,7 @@ class GRNEngine:
         )
         return rec
 
-    # ── Batched updates (from scRNA perturbation conditions) ─────────────────
+    # Batched updates (from scRNA perturbation conditions)
 
     def batch_update_from_conditions(
         self,
@@ -246,9 +246,8 @@ class GRNEngine:
         return self._update_counter
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # 2. Rank-1 Detector (SVD validation)
-# ─────────────────────────────────────────────────────────────────────────────
+# ---------------------------------------------------------------------------
 
 @dataclass
 class SVDResult:
@@ -343,9 +342,9 @@ class RankOneDetector:
         return result
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # 3. ker(F) Load Estimator
-# ─────────────────────────────────────────────────────────────────────────────
+# ---------------------------------------------------------------------------
 
 class KernelLoadEstimator:
     """
