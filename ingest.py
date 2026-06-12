@@ -1,6 +1,5 @@
 """
 ingest.py — scRNA-seq Matrix Ingestion & Preprocessing
-=======================================================
 Accepts: 10x Genomics MEX (matrix.mtx.gz + barcodes + features),
          AnnData (.h5ad), plain .h5, or a dense CSV/TSV.
 
