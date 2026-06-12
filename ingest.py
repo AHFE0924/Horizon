@@ -27,7 +27,7 @@ import torch
 
 logger = logging.getLogger(__name__)
 
-# ── dtype / device helpers ────────────────────────────────────────────────────
+# dtype / device helpers 
 
 def _get_device(force_cpu: bool = False) -> torch.device:
     if force_cpu:
@@ -42,8 +42,7 @@ def _to_dense_numpy(X) -> np.ndarray:
     return np.asarray(X, dtype=np.float32)
 
 
-# ── Loaders ───────────────────────────────────────────────────────────────────
-
+# Loaders 
 def load_10x_mex(folder: Union[str, Path]) -> ad.AnnData:
     """
     Load 10x MEX directory.
@@ -123,7 +122,7 @@ def auto_load(path: Union[str, Path]) -> ad.AnnData:
     raise ValueError(f"Unrecognised format for path: {path}")
 
 
-# ── Preprocessing ─────────────────────────────────────────────────────────────
+# Preprocessing 
 
 def preprocess(
     adata: ad.AnnData,
@@ -145,19 +144,19 @@ def preprocess(
     adata = copy.copy(adata)
     X = _to_dense_numpy(adata.X)
 
-    # Gene filter: keep genes expressed in ≥ min_cells cells
+    # Gene filter
     gene_mask = (X > 0).sum(axis=0) >= min_cells
     X = X[:, gene_mask]
     adata = adata[:, gene_mask].copy()
     logger.info("After gene filter: %d genes retained", X.shape[1])
 
-    # Cell filter: keep cells with ≥ min_genes detected genes
+    # Cell filter
     cell_mask = (X > 0).sum(axis=1) >= min_genes
     X = X[cell_mask, :]
     adata = adata[cell_mask, :].copy()
     logger.info("After cell filter: %d cells retained", X.shape[0])
 
-    # Mitochondrial QC (best-effort: look for MT- prefix)
+    # Mitochondrial QC 
     mt_genes = np.array([g.upper().startswith("MT-") for g in adata.var_names])
     if mt_genes.sum() > 0:
         mt_pct = X[:, mt_genes].sum(axis=1) / (X.sum(axis=1) + 1e-9)
@@ -182,7 +181,7 @@ def preprocess(
     return adata
 
 
-# ── col(F) / ker(F) partitioning ─────────────────────────────────────────────
+# col(F) / ker(F) partitioning 
 
 # Canonical codon usage table for E. coli K-12 (fraction per amino acid).
 # Rare codons (ker(F) proxies): those with codon usage frequency < 0.10.
