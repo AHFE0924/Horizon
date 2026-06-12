@@ -1,6 +1,5 @@
 """
 models.py — Kernel-Aware MLP vs Continuous MLP (Architecture Gap Proof)
-========================================================================
 Implements the Bio-Seam prediction that standard continuous embeddings
 cannot recover ker(F) regulatory signal, while a kernel-aware architecture
 (with explicit col/ker disentanglement) can.
