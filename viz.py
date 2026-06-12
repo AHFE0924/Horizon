@@ -1,6 +1,5 @@
 """
 viz.py — Publication-quality figures for the Quantum Bio-Seam pipeline
-=======================================================================
 All plots write to the outputs/plots/ directory.
 Designed to work with both synthetic and real plate-reader / scRNA-seq data.
 """
@@ -26,7 +25,7 @@ logger = logging.getLogger(__name__)
 PLOT_DIR = Path("outputs/plots")
 PLOT_DIR.mkdir(parents=True, exist_ok=True)
 
-# ── Color palette ─────────────────────────────────────────────────────────────
+# Color palette
 PALETTE = {
     "baseline":  "#444444",
     "cond_1":    "#4a9edd",
@@ -53,7 +52,7 @@ def _save(fig: plt.Figure, name: str, dpi: int = 150) -> Path:
     return out
 
 
-# ── 1. SVD Spectrum ────────────────────────────────────────────────────────────
+# 1. SVD Spectrum
 
 def plot_svd_spectrum(result, title_suffix: str = "") -> Path:
     S   = result.singular_values
@@ -100,7 +99,7 @@ def plot_svd_spectrum(result, title_suffix: str = "") -> Path:
     return _save(fig, "svd_spectrum.png")
 
 
-# ── 2. Architecture Gap ────────────────────────────────────────────────────────
+# 2. Architecture Gap
 
 def plot_architecture_gap(results: dict) -> Path:
     cont_mse  = results["Continuous MLP (current SOTA)"]["final_mse"]
@@ -139,7 +138,7 @@ def plot_architecture_gap(results: dict) -> Path:
     return _save(fig, "architecture_gap.png")
 
 
-# ── 3. Sherman-Morrison Efficiency ────────────────────────────────────────────
+# 3. Sherman-Morrison Efficiency 
 
 def plot_sm_efficiency(
     time_naive: float,
@@ -188,7 +187,7 @@ def plot_sm_efficiency(
     return _save(fig, "sm_efficiency.png")
 
 
-# ── 4. scRNA-seq kernel load map ──────────────────────────────────────────────
+# 4. scRNA-seq kernel load map 
 
 def plot_kernel_load(
     ker_load: torch.Tensor,     # (cells,)
@@ -232,7 +231,7 @@ def plot_kernel_load(
     return _save(fig, "kernel_load_map.png")
 
 
-# ── 5. GRN response map heatmap ───────────────────────────────────────────────
+# 5. GRN response map heatmap 
 
 def plot_grn_response_map(
     A_inv: torch.Tensor,    # (N, N) — show top-N_show genes
@@ -264,7 +263,7 @@ def plot_grn_response_map(
     return _save(fig, "grn_response_map.png")
 
 
-# ── 6. Summary dashboard ───────────────────────────────────────────────────────
+# 6. Summary dashboard 
 
 def plot_summary_dashboard(
     svd_result: SVDResult,
@@ -280,7 +279,7 @@ def plot_summary_dashboard(
     )
     gs = gridspec.GridSpec(2, 3, figure=fig, hspace=0.45, wspace=0.35)
 
-    # ── Panel 1: SVD spectrum ─────────────────────────────────────────────────
+    # Panel 1: SVD spectrum
     ax1 = fig.add_subplot(gs[0, 0])
     S   = svd_result.singular_values
     var = svd_result.variance_pct
@@ -296,7 +295,7 @@ def plot_summary_dashboard(
              fontsize=9, fontweight="bold")
     ax1.grid(True, axis="y", alpha=0.25)
 
-    # ── Panel 2: Architecture gap bar ────────────────────────────────────────
+    # Panel 2: Architecture gap bar
     ax2 = fig.add_subplot(gs[0, 1])
     cont_mse  = arch_results["Continuous MLP (current SOTA)"]["final_mse"]
     kaw_mse   = arch_results["Kernel-Aware MLP (Bio-Seam)"]["final_mse"]
@@ -312,7 +311,7 @@ def plot_summary_dashboard(
              color=PALETTE["validated"], fontsize=11, fontweight="bold")
     ax2.grid(True, axis="y", alpha=0.25)
 
-    # ── Panel 3: SM speedup ───────────────────────────────────────────────────
+    # Panel 3: SM speedup 
     ax3 = fig.add_subplot(gs[0, 2])
     t_naive, t_sm = sm_times
     ax3.bar(["O(N³)\nRe-inversion", "O(N²)\nSherman-Morrison"],
@@ -327,7 +326,7 @@ def plot_summary_dashboard(
              color=PALETTE["validated"], fontsize=11, fontweight="bold")
     ax3.grid(True, axis="y", alpha=0.25)
 
-    # ── Panel 4: Cumulative SVD variance ─────────────────────────────────────
+    # Panel 4: Cumulative SVD variance
     ax4 = fig.add_subplot(gs[1, 0])
     cum = svd_result.cumulative_var
     ax4.plot(range(1, len(cum)+1), cum, "o-", color=PALETTE["col_f"], lw=2)
@@ -337,7 +336,7 @@ def plot_summary_dashboard(
     ax4.set_title("Cumulative SVD Variance")
     ax4.set_ylim(0, 105); ax4.grid(True, alpha=0.25)
 
-    # ── Panel 5: Error metric comparison ─────────────────────────────────────
+    # Panel 5: Error metric comparison 
     ax5 = fig.add_subplot(gs[1, 1])
     ax5.axis("off")
     rows = [
@@ -361,7 +360,7 @@ def plot_summary_dashboard(
     tbl.scale(1.0, 2.0)
     ax5.set_title("Verification Ledger", fontweight="bold")
 
-    # ── Panel 6: Bio-Seam concept ─────────────────────────────────────────────
+    # Panel 6: Bio-Seam concept
     ax6 = fig.add_subplot(gs[1, 2])
     ax6.axis("off")
     lines = [
