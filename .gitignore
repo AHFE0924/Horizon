@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+outputs/
+data/
+*.h5ad
+*.csv
+*.zip
+.env
