@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.colors import LinearSegmentedColormap
 
-from sherman_morrison import SVDResult
+
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ def _save(fig: plt.Figure, name: str, dpi: int = 150) -> Path:
 
 # ── 1. SVD Spectrum ────────────────────────────────────────────────────────────
 
-def plot_svd_spectrum(result: SVDResult, title_suffix: str = "") -> Path:
+def plot_svd_spectrum(result, title_suffix: str = "") -> Path:
     S   = result.singular_values
     var = result.variance_pct
     cum = result.cumulative_var
